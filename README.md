@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/jfachriz/ux-cook/actions/workflows/build-uxdroid.yml"><img src="https://github.com/RandomCoderOrg/fs-cook/actions/workflows/build-udroid.yml/badge.svg" alt="Build Tests"></a>
   <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fjfachrizg%2Ffs-cook?ref=badge_shield"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FRandomCoderOrg%2Ffs-cook.svg?type=shield" alt="FOSS License"></a>
-  <a href="https://www.codefactor.io/repository/github/randomcoderorg/fs-cook"><img src="https://www.codefactor.io/repository/github/randomcoderorg/fs-cook/badge" alt="CodeFactor Grade"></a>
+  <a href="https://www.codefactor.io/repository/github/jfachriz/ux-cook"><img src="https://www.codefactor.io/repository/github/randomcoderorg/fs-cook/badge" alt="CodeFactor Grade"></a>
 </p>
 
 # UX-Cook
