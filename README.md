@@ -23,5 +23,5 @@
 * **Streamlined Workflow:** Automates the heavy lifting to make fetching, building, and packing much easier.
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjfachriz%2Ffs-cook.svg?type=large)]
-(https://app.fossa.com/projects/git%2Bgithub.com%2FRandomCoderOrg%2Ffs-cook?ref=badge_medium)
+(https://app.fossa.com/projects/git%2Bgithub.com%2FRandomCoderOrg%2Ffs-cook?ref=badge_large)
 
