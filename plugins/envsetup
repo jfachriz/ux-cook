@@ -1,0 +1,634 @@
+#!/usr/bin/env bash
+
+################################
+# MIT License
+#
+# Copyright (c) 2026 jfachriz <fachrizj@gmail.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+export ROOT_DIR
+export BUILD_PLATFORM="linux"
+
+_c_magneta="\e[95m"
+_c_green="\e[32m"
+_c_red="\e[31m"
+_c_blue="\e[34m"
+RST="\e[0m"
+
+die()    { echo -e "${_c_red}[E] ${*}${RST}";exit 1;:;}
+warn()   { echo -e "${_c_red}[W] ${*}${RST}";:;}
+shout()  { echo -e "${_c_blue}[-] ${*}${RST}";:;}
+lshout() { echo -e "${_c_blue}-> ${*}${RST}";:;}
+msg()    { echo -e "${*} \e[0m" >&2;:;}
+
+# Check if environment is Termux
+if [ "$(uname -o)" = "Android" ]; then
+    export BUILD_PLATFORM="termux"
+fi
+
+# sudo check
+if [ "$(id -u)" != "0" ]; then
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+        SUDO=""
+    else
+        if command -v sudo &>/dev/null; then
+            SUDO="sudo"
+        else
+            die "This script requires root privileges"
+        fi
+    fi
+fi
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+trim_quotes() {
+    # Usage: trim_quotes "string"
+    : "${1//\'}"
+    printf '%s\n' "${_//\"}"
+}
+
+banner() {
+    tty_width=$(stty size | cut -d ' ' -f 2)
+
+    if ((tty_width >= 80)); then
+        msg "'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::::::::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m:"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m.....::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m... ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::::::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m... ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:'${_c_magneta}#\e[0m${_c_magneta}#\e[0m.... ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:'${_c_magneta}#\e[0m${_c_magneta}#\e[0m.... ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m::"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::..::::::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::..:: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:'${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m...:::::..... ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::::::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::::::::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::"
+        msg " ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:::::::. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::'${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m:. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m::. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m${_c_magneta}#\e[0m:: ${_c_magneta}#\e[0m${_c_magneta}#\e[0m::. ${_c_magneta}#\e[0m${_c_magneta}#\e[0m:"
+        msg "..:::::::::......:::.......:::......::::.......::::.......:::..::::..::"
+        msg "jfachriz"
+    else
+        msg "${_c_magneta}ux-cook\e[0m jfachriz"
+        msg "\e[jfachriz"
+    fi
+}
+
+do_mount() {
+    local chroot_dir=$1
+    points="$chroot_dir/dev $chroot_dir/sys $chroot_dir/proc"
+    see_for_directory "$points"
+
+    if ! is_mounted "$chroot_dir/dev"; then
+      shout "mounting: $chroot_dir/dev"
+      $SUDO mount -o bind /dev "$chroot_dir"/dev
+      $SUDO mount --bind /dev/pts "$chroot_dir"/dev/pts
+    fi
+
+    if ! is_mounted "$chroot_dir"/proc; then
+      shout "mounting: $chroot_dir/proc"
+      $SUDO mount -t proc /proc "$chroot_dir"/proc
+    fi
+
+    if ! is_mounted "$chroot_dir"/sys; then
+      shout "mounting: $chroot_dir/sys"
+      $SUDO mount -t sysfs /sys "$chroot_dir"/sys
+    fi
+}
+
+do_unmount()
+{
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+      lshout "Skip unmount for termux"
+    else
+      local chroot_dir=$1
+      points="$chroot_dir/dev $chroot_dir/sys $chroot_dir/proc"
+      see_for_directory "$points"
+      if is_mounted "$chroot_dir/dev"; then
+        shout "unmounting: $chroot_dir/dev"
+        $SUDO umount "$chroot_dir"/dev/pts
+        $SUDO umount "$chroot_dir"/dev
+      fi
+
+      if is_mounted "$chroot_dir"/proc; then
+        shout "unmounting: $chroot_dir/proc"
+        $SUDO umount $chroot_dir/proc
+      fi
+
+      if is_mounted "$chroot_dir"/sys; then
+        shout "unmounting: $chroot_dir/sys"
+        $SUDO umount "$chroot_dir"/sys
+      fi
+    fi
+}
+
+is_mounted() {
+    local chroot_dir=$1
+    if [ -d "$chroot_dir" ]; then
+        if mountpoint -q "$chroot_dir" >> /dev/null; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
+list_parser() {
+    export count
+    export include_list
+
+    count=0
+    include_list=""
+
+    list_file=$1
+
+    if [ -f "$list_file" ]; then
+        buffer=$(cat "$list_file")
+        for line in $buffer; do
+            ((count++))
+            include_list+=" $line"
+        done
+    else
+        echo "File $list_file not found.."
+    fi
+}
+
+depends_on() {
+    local packages="$1"
+    export x
+
+    x=0
+    for package in ${packages}; do
+        if ! command -v "${package}" &>/dev/null; then
+            warn "Missing package: ${package}"
+            ((x = x + 1))
+        fi
+    done
+
+    if ((x > 0)); then
+        die "Found missing packages: ${packages}"
+    fi
+}
+
+dpkg_depends_on() {
+    local packages="$1"
+    export x
+
+    x=0
+    for package in ${packages}; do
+        if ! dpkg -s "${package}" &>/dev/null; then
+            warn "Missing package: ${package}"
+            ((x = x + 1))
+        fi
+    done
+
+    if ((x > 0)); then
+        die "Found missing packages: ${packages}"
+    fi
+}
+
+see_for_directory() {
+    local es=true
+    dirs="$1"
+    x=0
+    for dir in $dirs; do
+        if [ ! -d "$dir" ]; then
+            warn "Missing directory: $dir"
+            ((x = x + 1))
+        fi
+    done
+    if ((x > 0)); then
+        die "Missing directories: ${dirs}"
+        export es=false
+    fi
+}
+
+no_to_directory() {
+    dir="$1"
+    if [ -z $NO_DIR_CHECK_OVERRIDE ]; then
+        export NO_DIR_CHECK_OVERRIDE=false
+    fi
+    if [ -d "$dir" ]; then
+        if $NO_DIR_CHECK_OVERRIDE; then
+            return 0
+        else
+            die "directory exits: $dir"
+        fi
+    fi
+}
+
+foreign_arch() {
+    arch=$1
+    worker_arch="$(dpkg --print-architecture)"
+    export foreign_worker=false
+    if [ "$arch" != "$worker_arch" ]; then
+        FOREIGN="--foreign"
+        foreign_worker=true
+    else
+        unset FOREIGN
+    fi
+}
+
+includes_packages() {
+    # comma sperated values
+    includes="bzip2 pv openssl ${INCLUDE_PACKAGES}"
+    # environment variable INCLUDE_PACKAGES
+    export includes
+    x=0
+    for item in $includes; do
+        ((x = x + 1))
+    done
+    shout "$x includes processed "
+}
+
+do_build() {
+    export target_dir="$1"
+    export arch="$2"
+    export CUR_BUILD_ARCH=$arch
+
+    local NO_COMPRESSION
+
+    if [ -z $ENABLE_USER_SETUP ]; then
+        export ENABLE_USER_SETUP=false
+    fi
+
+    foreign_arch "$arch"
+
+    # disable cross architecture building in Termux
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+        case $worker_arch in
+            aarch64) termux_arch="arm64" ;;
+            arm*) termux_arch="armhf" ;;
+            amd64|x86_64) termux_arch="amd64" ;;
+            *) die "Unknown architecture" ;;
+        esac
+        if [ "$termux_arch" != "$arch" ]; then
+            lshout "Skip building $target_dir for termux"
+            return 0
+        else
+            lshout "Building on Termux"
+            dpkg_depends_on debootstrap
+        fi
+    fi
+
+    includes_packages
+    no_to_directory "$target_dir"
+
+    export chroot_dir
+    chroot_dir=$target_dir
+
+    if [[ ! $DEBOOTSTRAP_DIR ]]; then
+        if [ "$BUILD_PLATFORM" == "termux" ]; then
+            # use default debootstrap directory in termux 
+            export DEBOOTSTRAP_DIR="$PREFIX/share/debootstrap"
+        else
+            # use custom debootstrap directory in linux 
+            export DEBOOTSTRAP_DIR="$ROOT_DIR/core/debootstrap-scripts"
+        fi
+    fi
+
+    if [ -n "$SUITE" ]; then
+            supported_suites="$(ls $DEBOOTSTRAP_DIR/scripts)"
+            suite_found=false
+            for sts in $supported_suites; do
+                if [ "$sts" == "$SUITE" ]; then
+                    suite="$SUITE"
+                    suite_found=true
+                    break
+                fi
+            done
+
+            if [ "$suite_found" == "false" ]; then
+                die "Unsupported suite: $SUITE"
+            fi
+    else
+        suite="jammy"
+    fi
+
+    shout "debootstraping $suite to $target_dir"
+
+    if [[ -n $OVERRIDER_MIRROR ]]; then
+      MIRROR="$OVERRIDER_MIRROR"
+    else
+      case $arch in
+        amd64|i386) MIRROR="http://archive.ubuntu.com/ubuntu/" ;;
+        *) MIRROR="http://ports.ubuntu.com/ubuntu-ports/" ;;
+        esac
+    fi
+
+    if ! $DEVCONTAINER || $DISABLE_LOCAL_DEBOOTSTRAP; then
+        _debootstrap="$ROOT_DIR/core/debootstrap/debootstrap"
+    else
+        _debootstrap=$(which debootstrap)
+    fi
+
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+        _debootstrap="$(which debootstrap)"
+        FOREIGN=""
+    fi
+
+    (
+        # execute debootstrap with bash to skip changing file permission
+        # to executable
+        $SUDO bash $_debootstrap \
+            $FOREIGN \
+            --arch="$arch" \
+            --no-check-gpg \
+            --include="${includes}" \
+            "$suite" \
+            "$target_dir" \
+            $MIRROR
+    ) || die "Couldn't debootstrap..."
+
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+        lshout "Skipping second stage for termux"
+        arch_translate "$arch"
+    else
+        if $foreign_worker; then
+            do_second_stage "$target_dir" "$arch"
+        fi
+    fi
+
+    if $ENABLE_USER_SETUP; then
+        setup_user
+    fi
+
+    if [ "$(type -t additional_setup)" == "function" ]; then
+        additional_setup
+    fi
+
+    shout "patching '/etc/os-release'"
+    sed -i 's/Ubuntu/Uxdroid/g' $target_dir/etc/os-release
+
+    if ! $NO_COMPRESSION; then
+        do_compress "$chroot_dir"
+    fi
+}
+
+arch_translate() {
+    arch=$1
+    export t_arch
+
+    case $arch in
+    arm64 | aarch64)
+        t_arch="aarch64"
+        ;;
+    armhf | arm)
+        t_arch="arm"
+        ;;
+    armel)
+        t_arch="armel"
+        ;;
+    amd64 | x86_64)
+        t_arch="x86_64"
+        ;;
+    i686 | i386)
+        t_arch="i386"
+        ;;
+    *) die "arch translator error" ;;
+    esac
+}
+
+do_second_stage() {
+    chroot_dir=$1
+    local arch=$2
+
+    dpkg_depends_on "binfmt-support"
+
+    do_qemu_user_emulation
+    $SUDO service binfmt-support start
+
+    # unset DEBOOTSTRAP_DIR before second stage
+    # this makes debootstrap to look for scripts inside its build filesystem
+    unset DEBOOTSTRAP_DIR
+    do_chroot_ae "$chroot_dir" /bin/bash /debootstrap/debootstrap --second-stage
+}
+
+do_qemu_user_emulation() {
+    arch_translate "$arch"
+    if $foreign_worker; then
+#         dpkg_depends_on "qemu-user-static"
+        $SUDO cp core/qemu-static/qemu-"$t_arch"-static "$chroot_dir/usr/bin/"
+    fi
+}
+
+setup_user() {
+    shout "Setting up user"
+    [[ -z $FS_USER ]] && warn "no username provided, skipping user setup.." && return 0
+    [[ -z $FS_PASS ]] && warn "no password provided, skipping user setup.." && return 0
+    cp plugins/setup-user.sh $chroot_dir
+    sed -i s/'$FS_USER'/$FS_USER/g $chroot_dir/setup-user.sh
+    sed -i s/'$FS_PASS'/$FS_PASS/g $chroot_dir/setup-user.sh
+    run_cmd "chmod +x /setup-user.sh"
+    run_cmd "/bin/bash /setup-user.sh"
+    run_cmd "rm -rf /setup-user.sh"
+    if $(ls $chroot_dir/home/$FS_USER); then
+        shout "User created : $FS_USER"
+    else
+        shout "User create failed..."
+    fi
+}
+
+do_chroot_proot_ae() {
+    dpkg_depends_on proot
+    local chroot_dir=$1
+    shift
+    local cmd_string=$*
+    local root_fs_path=${chroot_dir}
+
+    unset LD_PRELOAD
+    proot \
+        --link2symlink \
+        --sysvipc \
+        --kill-on-exit \
+        -b /system \
+        -b /sys \
+        -b /proc \
+        -b /dev \
+        -b /dev/urandom:/dev/random \
+        -b /proc/self/fd/1:/dev/stdout \
+        -b /proc/self/fd/2:/dev/stderr \
+        -b /proc/self/fd/0:/dev/stdin \
+        -b /proc/self/fd:/dev/fd \
+        -b /data/data/com.termux/files/usr \
+        -b /data/data/com.termux/files/home \
+        -b /data/data/com.termux/cache \
+        -b /storage/self/primary:/sdcard \
+        -b "${root_fs_path}"/tmp:/dev/shm \
+        --root-id \
+        --cwd=/root -L \
+        --kernel-release=5.4.0-faked \
+        --rootfs="${root_fs_path}" \
+            /usr/bin/env -i \
+            HOME=/root \
+            PATH=/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin \
+            TERM="$TERM" \
+            LANG=C.UTF-8 \
+            $cmd_string
+
+}
+
+do_chroot_root_ae() {
+    local chroot_dir=$1
+    shift
+    local command=$*
+    do_mount "$chroot_dir"
+    if [ -d "$chroot_dir" ]; then
+        (
+            $SUDO chroot "$chroot_dir" $command
+        ) || warn "Couldn't chroot or exited with non zero..."
+    else
+        die "chroot directory doesn't exist: $chroot_dir"
+    fi
+}
+
+do_chroot_ae() {
+    if [ $BUILD_PLATFORM == "termux" ]; then
+        do_chroot_proot_ae "$@"
+    else
+        do_chroot_root_ae "$@"
+    fi
+}
+
+do_compress() {
+    #compression
+    export TARGET_FILE
+    export chroot_dir=$1
+    TARGET_FILE="$(basename ${chroot_dir})"
+
+    if [ "$BUILD_PLATFORM" == "termux" ]; then
+        if [ ! -d "$chroot_dir" ]; then
+            lshout "Skip compressing $chroot_dir "
+            return 0
+        fi
+    fi
+
+    if [ -n "$OVERRIDER_COMPRESSION_TYPE" ]; then
+        case $OVERRIDER_COMPRESSION_TYPE in
+        bzip2) do_tar_bzip ;;
+        gzip) do_tar_gzip ;;
+        lz) do_tar_lz4 ;;
+        zstd) do_tar_zstd ;;
+        *)
+            shout "Unknown compression type"
+            shout "all compression: lz,gzip,bzip2,zstd"
+            die "Giving up!!"
+            ;;
+        esac
+    else
+        shout "Defaulting to bzip..."
+        do_tar_bzip
+    fi
+
+}
+
+do_tar_lz4() {
+    shout "starting compression..."
+    $SUDO cp "plugins/lz-packer.sh" "${chroot_dir}"
+
+    do_chroot_ae            \
+     "$chroot_dir"          \
+     "chmod +x /lz-packer.sh"
+
+    do_chroot_ae            \
+        "$chroot_dir"       \
+        "/gz-packer.sh ${TARGET_FILE}"
+    $SUDO cp "${chroot_dir}/${TARGET_FILE}.lz" out
+}
+
+do_tar_gzip() {
+    shout "starting compression..."
+    $SUDO cp "plugins/gz-packer.sh" "${chroot_dir}"
+
+    do_chroot_ae \
+    "$chroot_dir" \
+    "chmod +x /gz-packer.sh"
+
+    do_chroot_ae \
+        "$chroot_dir" \
+        "/gz-packer.sh ${TARGET_FILE}"
+    $SUDO cp "${chroot_dir}/${TARGET_FILE}.tar.gz" out
+}
+
+do_tar_bzip() {
+    shout "starting compression..."
+    $SUDO cp "plugins/j-packer.sh" "${chroot_dir}"
+    do_chroot_ae \
+        "$chroot_dir" \
+        "chmod +x /j-packer.sh"
+    do_chroot_ae \
+        "$chroot_dir" \
+        "/bin/bash /j-packer.sh ${TARGET_FILE}"
+    $SUDO cp "${chroot_dir}/${TARGET_FILE}.tar.xz" out
+}
+
+do_tar_zstd() {
+    shout "installing zstd..."
+    install_pkg "zstd"
+    shout "starting compression..."
+    $SUDO cp "plugins/zst-packer.sh" "${chroot_dir}"
+    do_chroot_ae \
+        "$chroot_dir" \
+        "chmod +x /zst-packer.sh"
+    do_chroot_ae \
+        "$chroot_dir" \
+        "/bin/bash /zst-packer.sh ${TARGET_FILE}"
+    $SUDO cp "${chroot_dir}/${TARGET_FILE}.zst" out
+}
+
+run_cmd() {
+    local command=$*
+    do_chroot_ae "$chroot_dir" "$command"
+}
+
+run_shell_script() {
+    lshout "Running script: $1"
+    echo
+    echo
+    local script=$1
+    cp -v "$script" "$chroot_dir"
+    chmod +x "$chroot_dir/$(basename $script)"
+    do_chroot_ae "$chroot_dir" /bin/bash "/$script"
+    echo "Done running script: $1"
+}
+
+COPY() {
+    local src=$1
+    local dest=$2
+
+    if [ -d "$src" ]; then
+        $SUDO cp -vr "$src" "$chroot_dir/$dest"
+    else
+        if [ -f "$src" ]; then
+            $SUDO cp -v "$src" "$chroot_dir/$dest"
+        else
+            die "Couldn't find $src, no such file or directory"
+        fi
+    fi
+}
+
+install_pkg()
+{
+    pkg_name="$*"
+    run_cmd "apt-get update"
+    run_cmd "apt-get install -y $pkg_name" || warn "Couldn't install $pkg_name"
+    run_cmd "apt-get clean"
+}
+
+banner
+
+if [ "$BUILD_PLATFORM" == "termux" ]; then
+    lshout "Running on termux"
+fi
+
