@@ -1,21 +1,23 @@
-# ux-cook
-A project written in bash to make linux tarball building process easier
+<p align="center">
+  <img src="https://img.shields.io/badge/UXCOOK-0A192F?style=for-the-badge" alt="UXCOOK Banner" height="448">
+</p>
 
-|  | badges |
-|--|--      |
-|build tests | [![build-uxdroid](https://github.com/jfachriz/ux-cook/actions/workflows/build-uxdroid.yml/badge.svg)](https://github.com/jfachriz/ux-cook/actions/workflows/build-uxdroid.yml) |
-| FOSS LICENSE | [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjfachriz%2Fux-cook.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjfachriz%2Fux-cook?ref=badge_shield) |
-|Codefactor grade| [![CodeFactor](https://www.codefactor.io/repository/github/jfachriz/ux-cook/badge)](https://www.codefactor.io/repository/github/jfachriz/ux-cook) |
+<p align="center">
+  <a href="https://github.com/jfachriz/ux-cook/actions/workflows/build-uxdroid.yml"><img src="https://github.com/jfachriz/ux-cook/actions/workflows/build-uxroid.yml/badge.svg" alt="Build Tests"></a>
+  <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FRandomCoderOrg%2Ffs-cook?ref=badge_shield"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FRandomCoderOrg%2Ffs-cook.svg?type=shield" alt="FOSS License"></a>
+  <a href="https://www.codefactor.io/repository/github/randomcoderorg/fs-cook"><img src="https://www.codefactor.io/repository/github/randomcoderorg/fs-cook/badge" alt="CodeFactor Grade"></a>
+</p>
 
-[DEV] Linux tarball building
-> ⚠️ warning this code is heavily experimental & work in progress!
+# UX-Cook
+
+**UX-Cook** is a Bash-powered project designed to simplify and streamline the Linux tarball building process. 
+
+> ⚠️ **Disclaimer: Experimental & Work in Progress**
 >
-> most of the feature/code may not work
+> This project is currently in early development. Many features are actively being worked on, and some code may not function as intended yet. Use with caution!
 
-## What this can do
-- can build any latest ubuntu & debian varients
-- supports cross architecture building ( requires `binfmt-support` enabled in kernel )
-- make fetch, build, pack process easier
+## ✨ What It Can Do
 
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjfachriz%2Fux-cook.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjfachriz%2Fux-cook?ref=badge_large)
+* **Broad Compatibility:** Easily build tarballs for any of the latest Ubuntu and Debian variants.
+* **Cross-Architecture Support:** Compile for different architectures seamlessly *(Note: requires `binfmt-support` enabled in your kernel)*.
+* **Streamlined Workflow:** Automates the heavy lifting to make fetching, building, and packing much easier.
